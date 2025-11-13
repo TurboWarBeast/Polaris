@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Polaris Architect</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind + GSAP -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+  <style>
+    :root {
+      --glass: rgba(255, 255, 255, 0.12);
+      --border: rgba(255, 255, 255, 0.18);
+      --bg-start: #f8f9fa;
+      --bg-end: #e5e7eb;
+      --text: #1f2937;
+      --accent: #007aff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --glass: rgba(30, 30, 30, 0.35);
+        --border: rgba(255, 255, 255, 0.1);
+        --bg-start: #0f172a;
+        --bg-end: #1e293b;
+        --text: #f1f5f9;
+        --accent: #0ea5e9;
+      }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
+      transition: background 0.5s ease;
+    }
+    .liquid-glass {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      transition: all 0.4s ease;
+    }
+    .liquid-glass:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    .btn-apple {
+      background: var(--accent);
+      color: white;
+      padding: 14px 32px;
+      border-radius: 16px;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+    .btn-apple:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0, 122, 255, 0.4);
+    }
+    .year {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #007aff, #5856d6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 2rem;
+    }
+    .project-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 18px;
+      transition: all 0.5s ease;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    .project-img:hover {
+      transform: scale(1.06);
+      border-radius: 22px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+    .header-glass {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .hamburger {
+      width: 30px;
+      height: 20px;
+      cursor: pointer;
+      position: relative;
+    }
+    .hamburger span {
+      display: block;
+      width: 100%;
+      height: 3px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+    .hamburger span:nth-child(2) { margin: 5px 0; }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 280px;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 100px 30px 30px;
+      transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 999;
+    }
+    .sidebar.open { left: 0; }
+    .sidebar a {
+      display: block;
+      padding: 16px 0;
+      color: white;
+      font-weight: 500;
+      font-size: 1.1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: padding-left 0.3s ease;
+    }
+    .sidebar a:hover {
+      padding-left: 12px;
+      color: #0ea5e9;
+    }
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 998;
+    }
+    .overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- HERO IMAGE -->
+  <div class="relative h-96 md:h-screen overflow-hidden flex items-center justify-center">
+    <video
+      src="./images/POLARIS VIDEO.mp4"
+      alt="Hero Project"
+      class="absolute inset-0 w-full h-full object-cover"
+      onerror="this.src='https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80'"
+      autoplay
+      loop
+      muted
+    >
+    </video>
+    <div class="absolute inset-0 bg-white/20"></div>
+  </div>
+
+<!-- HEADER -->
+<header class="fixed top-0 w-full z-50 header-glass">
+  <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+    <div class="flex items-center gap-4">
+      <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="flex flex-col leading-tight">
+        <h1 class="text-2xl font-bold tracking-tight text-red-400">POLARIS</h1>
+        <span class="text-lg text-black -mt-1">Consulting Architects</span>
+      </div>
+    </div>
+    <div class="hidden md:flex gap-3">
+      <a href="#projects" class="nav-btn">Projects</a>
+      <a href="#about" class="nav-btn">About</a>
+      <a href="#contact" class="nav-btn">Contact</a>
+    </div>
+  </div>
+</header>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <a href="#hero">Home</a>
+    <a href="#projects">Projects</a>
+    <a href="#about">About Us</a>
+    <a href="#" onclick="openAwardsModal()">Awards & Accolades</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="overlay" id="overlay"></div>
+
+  <!-- HERO TEXT -->
+  <section id="hero" class="pt-32 pb-20 px-6 text-center">
+    <div class="max-w-5xl mx-auto">
+      <h1 class="text-6xl md:text-8xl font-bold mb-6 tracking-tighter">
+        Polaris<br><span class="text-5xl md:text-7xl bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Architect</span>
+      </h1>
+      <p class="text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
+        "GOOD DESIGN CAN LEAD TO BETTER FUTURE"
+      </p>
+      <a href="#projects" class="btn-apple inline-block">Explore Projects</a>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects" class="py-20 px-6">
+    <div class="max-w-7xl mx-auto space-y-24">
+
+      <!-- 2025 -->
+   
+
+      <!-- 2024 -->
+      
+
+      <!-- 2023 -->
+      <div>
+        <h2 class="year text-center">2023</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p119.jpg',
+            'PROJECT - COMMERCIAL COMPLEX',
+            'Status: PROPOSED 2023',
+            [
+              './images/p119.jpg' , 
+            ]
+            
+          )">
+            <img src="./images/p119.jpg" alt="PROJECT - COMMERCIAL COMPLEX" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p120.jpg',
+            'PROJECT - DIGHA AQUARIUM / AUDITORIUM',
+            ' This design is developed as journey through an underwater cave system while experiencing the marine life through different openings. The entrance is on a higher level to provide a beautiful view of the sea from entrance foyer beyond an infinity pool proposed to bring the sea experience within the building. The journey will lead the visitor from entrance lobby to the exhibition zone below the infinity pool simulating the experience of a journey through an underwater cave system. The exhibition will have four sections; 1) Warm sweet water species,  2) Warm salt water species,  3) Cold sweet water species,  4) Cold salt water species.  Location: DIGHA, Status: PROPOSED 2023',
+            [
+              './images/p120.jpg' , 
+              './images/p121.jpg' ,
+              './images/p122.jpg' ,
+              './images/p123.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p120.jpg" alt="PROJECT - DIGHA AQUARIUM / AUDITORIUM" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p124.jpg',
+            'PROJECT - B.C ROY MARKET ESPLANADE',
+            'Location: ESPLANADE, STATUS: COMPLETED 2023',
+            [
+              './images/p124.jpg',
+              './images/p125.jpg',
+              './images/p126.jpg',
+              './images/p127.jpg',
+              './images/p128.jpg',
+            
+            ]
+          )">
+            <img src="./images/p125.jpg" alt="PROJECT - B.C ROY MARKET ESPLANADE" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2022 -->
+
+      <!-- 2021 -->
+      <div>
+        <h2 class="year text-center">2021</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p52.jpg',
+            'INSTUITIONAL PROJECT - RABINDRA BHARATI UNIVERSITY',
+            'Client: PWD, Location: NEWTOWN, Status: COMPLETED',
+            [
+              './images/p52.jpg',
+              './images/p53.jpg',
+              './images/p54.jpg',
+              './images/p55.jpg',
+              './images/p56.jpg'
+            ]
+          )">
+            <img src="./images/p52.jpg" alt="INSTUITIONAL - RABINDRA BHARATI UNIVERSITY" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p57.jpg',
+            'PROJECT - SOCIAL HOUSING',
+            'Client: ASHOKA BUILTCON, Location: MALE, MALDIVES,',
+            [
+              './images/p58.jpg',
+              './images/p57.jpg',
+            
+            ]
+          )">
+            <img src="./images/p57.jpg" alt="PROJECT - SOCIAL HOUSING" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2020 -->
+      <div>
+        <h2 class="year text-center">2020</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p94.jpg',
+            'PROJECT - CORPORATE BHAWAN',
+            'Client: CPWD, Location: NEWTOWN KOLKATA, Status: COMPLETED',
+            [
+              './images/p94.jpg' ,
+              './images/p95.jpg' ,
+              './images/p96.jpg' ,
+              './images/p97.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p94.jpg" alt="PROJECT - CORPORATE BHAWAN" class="project-img">
+          </div>
+         <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p98.jpg',
+            'PROJECT - ATRIUM HOUSE',
+            'Client: PRIVATE, Location: KRISHNANAGAR, Status: PROPOSAL',
+            [
+              './images/p98.jpg' ,
+              './images/p99.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p98.jpg" alt="PROJECT - ATRIUM HOUSE" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p100.jpg',
+            'PROJECT - MSME KOLKATA',
+            'Client: CPWD, Location: NEWTOWN KOLKATA',
+            [
+              './images/p100.jpg' ,
+              './images/p101.jpg' ,
+              './images/p102.jpg' ,
+              './images/p103.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p100.jpg" alt="PROJECT - MSME KOLKATA" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p103.jpg',
+            'PROJECT - RIVERDALE',
+            'Client: RIVERDALE, Location: GOA, Status: PROPOSAL',
+            [
+              './images/p103.jpg' ,
+              './images/p104.jpg' ,
+              './images/p105.jpg' ,
+              './images/p106.jpg' ,
+              './images/p107.jpg' ,
+              './images/p108.jpeg' , 
+            ]
+            
+          )">
+            <img src="./images/p103.jpg" alt="PROJECT - RIVERDALE" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p109.jpg',
+            'PROJECT - SP INFOCITY',
+            'Client: SPCL, Location: MUMBAI, Status: PROPOSAL',
+            [
+              './images/p109.jpg' ,
+              './images/p110.jpg' ,
+              './images/p111.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p109.jpg" alt="PROJECT - SP INFOCITY" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p112.jpg',
+            'PROJECT - UPOHAR COMMUNITY CENTER',
+            'Client: UPOHAR, Location: KOLKATA, Status: COMPLETED',
+            [
+              './images/p112.jpg' ,
+              './images/p113.jpg' ,
+              './images/p114.jpg' ,
+              './images/p115.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p112.jpg" alt="PROJECT - UPOHAR COMMUNITY CENTER" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2019 -->
+      <div>
+        <h2 class="year text-center">2019</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p79.jpg',
+            'PROJECT - HOUSING COMPLEX',
+            'Location: AGARTALA, Status: CONCEPT DESIGN',
+            [
+              './images/p79.jpg' ,
+              './images/p80.jpg' ,
+              './images/p81.jpg' ,
+              './images/p82.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p79.jpg" alt="PROJECT - HOUSING COMPLEX" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p84.jpg',
+            'PROJECT - COMMERCIAL COMPLEX',
+            'Location: KRISHNANAGAR, Status: ON GOING',
+            [
+              './images/p84.jpg' , 
+            ]
+            
+          )">
+            <img src="./images/p84.jpg" alt="PROJECT - COMMERCIAL COMPLEX" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p85.jpg',
+            'PROJECT ESPLANADE METRO',
+            'Client: STUP, Location: KOLKATA, Status: COMPLETED',
+            [
+              './images/p85.jpg' ,
+              './images/p86.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p85.jpg" alt="PROJECT ESPLANADE METRO" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p87.jpg',
+            'PROJECT - MSME CAMPUS',
+            'Client: CPWD, Location: BITHA, PATNA, Status: IN PROGRESS',
+            [
+              './images/p87.jpg' ,
+              './images/p88.jpg' ,
+              './images/p89.jpg' ,
+              './images/p90.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p87.jpg" alt="PROJECT - MSME CAMPUS" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p91.jpg',
+            'PROJECT - LIVING TOWER',
+            'Client: SATARA MUNICIPAL COUNCIL, Location: MUMBAI, Status: COMPETITION ENTRY',
+            [
+              './images/p91.jpg' ,
+              './images/p92.jpg' ,
+              './images/p93.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p91.jpg" alt="PROJECT - LIVING TOWER" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p118.jpg',
+            'PROJECT - ICONIC TOWER',
+            'Location: NEWTOWN, Status: PROPOSAL 2019',
+            [
+              './images/p118.jpg',
+            ]
+          )">
+            <img src="./images/p118.jpg" alt="PEOJECT - ICONIC TOWER" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2018 -->
+      <div>
+        <h2 class="year text-center">2018</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p68.jpg',
+            'PROJECT - DANCING TOWER',
+            'Client: SPCL, Location: AMARAVATI, Status: IN PROGRESS',
+            [
+              './images/p68.jpg' ,
+              './images/p69.jpg' ,
+              './images/p70.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p68.jpg" alt="PROJECT - DANCING TOWER" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p71.jpg',
+            'PROJECT - BARILLA PAVILION',
+            'Client: BARILLA PAVILION, Location: ITALY, Status: COMPETITION ENTRY',
+            [
+              './images/p71.jpg' ,
+              './images/p72.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p71.jpg" alt="PROJECT - BARILLA PAVILION" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p73.jpg',
+            'HIGHRISE - DHAKA OFFICE TOWER',
+            'Client: SPCL, Location: DHAKA, Status: PROPOSAL',
+            [
+              './images/p73.jpg' ,
+              './images/p74.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p73.jpg" alt="HIGHRISE - DHAKA OFFICE TOWER" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p75.jpg',
+            'PROJECT - INTERNATIONAL SCOLAR\'S HOSTEL',
+            'Client: CPWD, Location: KHARAGPUR',
+            [
+              './images/p75.jpg' ,
+              './images/p76.jpg' ,
+              './images/p77.jpg' ,
+              './images/p78.jpg' ,
+            ]
+          )">
+
+            <img src="./images/p75.jpg" alt="PROJECT - INTERNATIONAL SCOLAR'S HOSTEL" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2017 -->
+      <div>
+        <h2 class="year text-center">2017</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p50.jpg',
+            'PROJECT - FRAMES',
+            'Client: CONSTELL, Location: NEWTOWN',
+            [
+              './images/p50.jpg' ,
+              './images/p51.jpg'
+            ]
+          )">
+            <img src="./images/p50.jpg" alt="PROJECT - FRAMES" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p59.jpg',
+            'PROJECT - BSDC',
+            'Client: STERLING WILSON, Location: JAIPUR',
+            [
+              './images/p59.jpg' ,
+              './images/p60.jpg' ,
+              './images/p61.jpg'
+            ]
+          )">
+            <img src="./images/p59.jpg" alt="PROJECT - BSDC " class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p62.jpg',
+            'OFFICE - DHARITRI OFFICE BUILDING',
+            'Client: CPWD, Location: KOLKATA, Status: IN PROGRESS',
+            [
+              './images/p62.jpg' ,
+              './images/p63.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p62.jpg" alt="OFFICE - DHARITRI OFFICE BUILDING" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p64.jpg',
+            'PROJECT - IACS CAMPUS',
+            'Client: CPWD, Location: Baruipur, Status: IN PROGRESS',
+            [
+              './images/p64.jpg' ,
+              './images/p65.jpg' ,
+              './images/p66.jpg' ,
+              './images/p67.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p64.jpg" alt="PROJECT - IACS CAMPUS" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2016 -->
+      <div>
+        <h2 class="year text-center">2016</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p44.jpg',
+            'CAMPUS PLANNING - BISWA BANGLA VISHWAVIDYALAYA CAMPUS',
+            'Client: BBB, Location: BOLPUR, Status: COMPETITION ENTRY',
+            [
+              './images/p44.jpg'
+            ]
+          )">
+            <img src="./images/p44.jpg" alt="CAMPUS PLANNING - BISWA BANGLA VISHWAVIDYALAYA CAMPUS" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p45.jpg',
+            'COMMERCIAL - OFFICE BUILDING',
+            'Status: CONCEPT DESIGN',
+            [
+              './images/p45.jpg' ,
+              './images/p46.jpg' ,
+              './images/p47.jpg'
+            ]
+          )">
+            <img src="./images/p45.jpg" alt="COMMERCIAL - OFFICE BUILDING" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p48.jpg',
+            'INSTUITIONAL BUILDING - BE COLLEGE',
+            'Status: CONCEPT DESIGN 2016',
+            [
+              './images/p48.jpg' ,
+            ]
+          )">
+            <img src="./images/p48.jpg" alt="INSTUITIONAL BUILDING" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p49.jpg',
+            'MEDICAL - KPC MEDICAL COLLEGE',
+            'Client: KPC MEDICAL COLLEGE, Location: KOLKATA, Status: COMPLETED',
+            [
+              './images/p49.jpg' ,
+            ]
+          )">
+            <img src="./images/p49.jpg" alt="MEDICAL - KPC MEDICAL COLLEGE" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2015 -->
+      <div>
+        <h2 class="year text-center">2015</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p36.jpg',
+            'HOUSING - SUNSHINE CITY HOUSING INSTUITIONAL - SUNSHINE CITY SCHOOL',
+            'Client: SHRISTI COMPLEX PVT. LTD., Location: D.H. ROAD, Status: DESIGN STAGE',
+            [
+              './images/p36.jpg' ,
+              './images/p37.jpg'
+            ]
+          )">
+            <img src="./images/p36.jpg" alt="HOUSING - SUNSHINE CITY HOUSING" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p38.jpg',
+            'INSTUITIONAL - THE TREE SCHOOL',
+            'Client: THE TREE SCHOOL, Location: DEVPUR, Status: COMPETITION ENTRY',
+            [
+              './images/p38.jpg' ,
+            ]
+          )">
+            <img src="./images/p38.jpg" alt="INSTUITIONAL - THE TREE SCHOOL" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p39.jpg',
+            'INSTUITIONAL - VARNA LIBRARY',
+            'Client: VARNA MUNICIPALITY, Location: VARNA, BULGARIA, Status: INTERNATIONAL COMPETITION ENTRY',
+            [
+              './images/p39.jpg' ,
+              './images/p40.jpg' ,
+              './images/p41.jpg' ,
+              './images/p42.jpg' 
+            ]
+          )">
+            <img src="./images/p39.jpg" alt="INSTUITIONAL - VARNA LIBRARY" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p43.jpg',
+            'AUDITORIUM - KANKURGACHI AUDITORIUM',
+            'Client: PWD, Location: KANKURGACHI, Status: COMPLETED',
+            [
+              './images/p43.jpg' ,
+            ]
+          )">
+            <img src="./images/p43.jpg" alt="AUDITORIUM - KANKURGACHI AUDITORIUM" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2014 -->
+      <div>
+        <h2 class="year text-center">2014</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p29.jpg',
+            'CULTURAL - GUGENHEIM MEUSEUM, Helsinki',
+            'Client: GUGENHEIM MEUSEUM ARCHITECT COMPETITION, Location: Helsinki, Status: International Competition Design Entry',
+            [
+              './images/p29.jpg' ,
+              './images/p30.jpg',
+            ]
+          )">
+            <img src="./images/p29.jpg" alt="CULTURAL - GUGENHEIM MEUSEUM, Helsinki" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p31.jpg',
+            'COMMERCIAL - SAJIRHAT MALL',
+            'Client: SAJIRHAT MALL, Location: SAJIRHAT, Status: PROPOSED',
+            [
+              './images/p31.jpg' ,
+            ]
+          )">
+            <img src="./images/p31.jpg" alt="COMMERCIAL - SAJIRHAT MALL" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p32.jpg',
+            'OFFICE',
+          
+            [
+              './images/p32.jpg' ,
+            ]
+          )">
+            <img src="./images/p32.jpg" alt="OFFICE" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p21.jpg',
+            'HOSPITALITY - SOLACE CLUB & RESORT',
+            'Client: VISWAMITRA PARIWAR, Location: AMTALA, Status: UNDER CONSTRUCTION',
+            [
+              './images/p21.jpg' ,
+            ]
+          )">
+            <img src="./images/p21.jpg" alt="HOSPITALITY - SOLACE CLUB & RESORT" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p33.jpg',
+            'HOSPITALITY - DOLNA SCHOOL RECREATIONAL HOSTEL',
+            'Client: DOLNA DAY SCHOOL TRUST, Location: SANTINIKETAN, Status: IN SANCTION PROCESS',
+            [
+              './images/p33.jpg' ,
+            ]
+          )">
+            <img src="./images/p33.jpg" alt="HOSPITALITY - DOLNA SCHOOL RECREATIONAL HOSTEL" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p34.jpg',
+            'INFRASTRUCTURE - KINMEN PORT TERMINAL',
+            'Client: KIMEN PORT AUTHORITY, Location: KINMEN, Status: ENTRY IN AN INTERNATIONAL COMPETITION',
+            [
+              './images/p34.jpg' ,
+              './images/p35.jpg',
+            ]
+          )">
+            <img src="./images/p34.jpg" alt="INFRASTRUCTURE - KINMEN PORT TERMINAL" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2013 -->
+      <div>
+        <h2 class="year text-center">2013</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p21.jpg',
+            'HOSPITALITY - SOLACE CLUB & RESORT',
+            'Client: VISWAMITRA PARIWAR, Location: AMTALA, Status: UNDER CONSTRUCTION',
+            [
+              './images/p21.jpg' ,
+            ]
+          )">
+            <img src="./images/p21.jpg" alt="HOSPITALITY - SOLACE CLUB & RESORT" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p22.jpg',
+            'HOSPITALITY - MANIPUR VVIP GUEST HOUSE',
+            'Client: SIMPLEX INFRA. PVT. LTD., Location: MANDARMANI, Status: CONCEPT DESIGN',
+            [
+              './images/p22.jpg' ,
+            ]
+          )">
+            <img src="./images/p22.jpg" alt="HOSPITALITY - MANIPUR VVIP GUEST HOUSE" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p23.jpg',
+            'HOUSING - MAYFAIR HOUSING',
+            'Client: MAYFAIR, Location: ODISHA, Status: ARCHITECT CONSULTANT',
+            [
+              './images/p23.jpg' 
+            ]
+          )">
+            <img src="./images/p23.jpg" alt="HOUSING - MAYFAIR HOUSING" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p24.jpg',
+            'INFRASTRUCTURE - ISBT INDORE',
+            'Client: IDA, Location: INDORE, Status: FILALIST LIST A IN A NATIONAL LEVEL COMPETITION',
+            [
+              './images/p24.jpg' 
+            ]
+          )">
+            <img src="./images/p24.jpg" alt="INFRASTRUCTURE - ISBT INDORE" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p25.jpg',
+            'COMMERCIAL - BOLPUR IT PARK',
+            'Client: MNCODS / WEBEL, Location: BOLPUR, Status: COMPLETED',
+            [
+              './images/p25.jpg' ,
+              './images/P26.jpg',
+              './images/P27.jpg'
+            ]
+          )">
+            <img src="./images/p25.jpg" alt="HOSPITALITY - SANA BEACH RESORT" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p28.jpg',
+            'SPORTS FACILITY - JAIPAIGURI STADIUM',
+            'Client: MNCODS, Location: JAIPAIGURI, Status: PROPOSAL',
+            [
+              './images/p28.jpg' 
+            ]
+          )">
+            <img src="./images/p28.jpg" alt="SPORTS FACILITY - JAIPAIGURI STADIUM" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2012 -->
+      <div>
+        <h2 class="year text-center">2012</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p17.jpg',
+            'CULTURAL - BHAGAT SINGH BHAVAN',
+            'Client: W.B HIDCO, Location: RAJARHAT, Status: COMPLETED',
+            [
+              './images/p17.jpg' ,
+              './images/p18.jpg' 
+            ]
+          )">
+            <img src="./images/p17.jpg" alt="CULTURAL - BHAGAT SINGH BHAVAN" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p19.jpg',
+            'OFFICE - EDMC OFFICE BUILDING',
+            'Client: EDMC, Location: DELHI, Status: 3RD PRIZE WINNING SCHEME IN ASSOCIATION WITH MNCODS IN A NATIONAL LEVEL  COMPETITION',
+            [
+              './images/p19.jpg' ,
+            ]
+          )">
+            <img src="./images/p19.jpg" alt="HOSPITALITY - SANA BEACH RESORT" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/P20.jpg',
+            'INSTITUTE - NABADWIP B-ED COLLEGE',
+            'Client: NABADWIP B-ED COLLEGE, Location: NABADWIP, Status: PROPOSAL',
+            [
+              './images/P20.jpg' ,
+              
+            ]
+          )">
+            <img src="./images/P20.jpg" alt="HOSPITALITY - SANA BEACH RESORT" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p116.jpg',
+            'PROJECT - MULTI STOREY OFFICE COMPLEX',
+            'Client: BENGAL AMBUJA, Location: EAST DELHI, Status: PROPOSED 2012',
+            [
+              './images/p116.jpg' ,
+              './images/p117.jpg' ,
+            ]
+          )">
+            <img src="./images/p116.jpg" alt="PROJECT - MULTI STOREY OFFICE COMPLEX" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2011 -->
+      <div>
+        <h2 class="year text-center">2011</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p16.jpg',
+            'INSTUITIONAL - ITME D.H ROAD',
+            'Client: BENGAL AMBUJA, Location: RAICHAK, Status: COMPLETED',
+            [
+              './images/p16.jpg'
+            ]
+          )">
+            <img src="./images/p16.jpg" alt="INSTUITIONAL - ITME D.H ROAD" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p16.jpg',
+            'RABINDRA TIRTHA CULTURAL CENTRE',
+            'Client: W.B HIDCO / SIMPLEX, Location: RAJARHAT, Status: COMPLETED',
+            [
+              './images/014.jpg' ,
+              './images/ARIAL.JPG',
+              './images/ART-GALLERY.jpg',
+              './images/AUDI-INT.jpg',
+              './images/LANDSCAPE1.jpg',
+              './images/LANDSCAPE2.jpg',
+              './images/LANDSCAPE3.jpg',
+            
+            ]
+          )">
+            <img src="./images/014.jpg" alt="RESIDENCE - MR. PANDE'S RESIDENCE" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2010 -->
+      <div>
+        <h2 class="year text-center">2010</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p15.jpg',
+            'RESIDENCE - MR. PANDE\'S RESIDENCE',
+            'Client: MR. PANDE, Location: KRISHNANAGAR, Status: COMPLETED',
+            [
+              './images/p15.jpg'  
+            ]
+          )">
+            <img src="./images/p15.jpg" alt="RESIDENCE - MR. PANDE'S RESIDENCE" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2009 -->
+      <div>
+        <h2 class="year text-center">2009</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6"><div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p14.jpg',
+            'HOSPITALITY - UDAYPUR HOTEL',
+            'Client: BASIL GROUP, Location: UDAYPUR, Status: UNDER CONSTRUCTION',
+            [
+              './images/p14.jpg'  
+            ]
+          )">
+            <img src="./images/p14.jpg" alt="HOSPITALITY - UDAYPUR HOTEL" class="project-img">
+          </div>
+        </div>
+
+      <!-- 2007 -->
+      <div>
+        <h2 class="year text-center">2007</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p8.jpg',
+            'COMMERCIAL - SUNSHINE CITY MALL',
+            'Client: Brishti Complex pvt. ltd. , Location: DH Road, Status: Design Stage',
+            [
+              './images/p8.jpg'  
+            ]
+          )">
+            <img src="./images/p8.jpg" alt="COMMERCIAL - SUNSHINE CITY MALL" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p9.jpg',
+            'HOUSING - GOURIKUNJA HOUSING',
+            'Client: BENGAL SHELTER, Location: GOURIPUR, Status: ARCHITECT consultant',
+            [
+              './images/p9.jpg'  
+            ]
+          )">
+            <img src="./images/p9.jpg" alt="HOUSING - GOURIKUNJA HOUSING" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p10.jpg',
+            'HOUSING - THAKURPUKUR HOUSING',
+            'Client: BENGAL SHELTER, Location: THAKURPUKUR, Status: ARCHITECT consultant',
+            [
+              './images/p10.jpg'  
+            ]
+          )">
+            <img src="./images/p10.jpg" alt="HOUSING - THAKURPUKUR HOUSING" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p11.jpg',
+            'HOUSING - SHYAM NAGAR HOUSING',
+            'Client: SRIDHAN MALL, Location: SHYAM NAGAR, Status: ARCHITECT consultant',
+            [
+              './images/p11.jpg'  
+            ]
+          )">
+            <img src="./images/p11.jpg" alt="HOUSING - SHYAM NAGAR HOUSING" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p12.jpeg',
+            'INTERIOR - NUJS AUDITORIUM',
+            'Client: NUJS, Location: KOLKATA EM BYPASS, Status: COMPLETED',
+            [
+              './images/p12.jpeg'  
+            ]
+          )">
+            <img src="./images/p12.jpeg" alt="INTERIOR - NUJS AUDITORIUM" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p13.jpg',
+            'RETAIL - ASANSOL SHOPPING MALL',
+            'Client: PODDAR GROUP, Location: ASANSOL, Status: PROPOSAL',
+            [
+              './images/p13.jpg'  
+            ]
+          )">
+            <img src="./images/p13.jpg" alt="RETAIL - ASANSOL SHOPPING MALL" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2006 -->
+      <div>
+        <h2 class="year text-center">2006</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p1.jpg',
+            'HOSPITALITY - SANA BEACH RESORT',
+            'Client: LEIURE AND LUXYRY, Location: MANDARMANI, Status: COMPLETED',
+            [
+              './images/p1.jpg' ,
+              './images/20_SANA BEACH RESORT.jpeg'
+            ]
+          )">
+            <img src="./images/p1.jpg" alt="HOSPITALITY - SANA BEACH RESORT" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p2.jpg',
+            'HOUSING - RIYADH HOUSING',
+            'Client: RIYADH URBAN DEVELOPMENT AUTHORITY, Location: RIYADH, Status: COMPETITION ENTRY',
+            [
+              './images/p2.jpg'  
+            ]
+          )">
+            <img src="./images/p2.jpg" alt="HOUSING - RIYADH HOUSING" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p3.jpg',
+            'INTERIOR - AB MAURI OFFICE',
+            'Client: AB MAURI, Location: KOLKATA, Status: COMPLETED',
+            [
+              './images/p3.jpg'  
+            ]
+          )">
+            <img src="./images/p3.jpg" alt="INTERIOR - AB MAURI OFFICE" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p4.jpg',
+            'INTERIOR - CCFC OLD BAR',
+            'Client: CCFC, Location: KOLKATA, Status: COMPLETED',
+            [
+              './images/p4.jpg'  
+            ]
+          )">
+            <img src="./images/p4.jpg" alt="INTERIOR - CCFC OLD BAR" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p5.jpg',
+            'LANDSCAPE - SELECTED PROJECTS',
+            'Client: Camous Landscaping Sana Beach Resort, Location: Madarmani, Status: COMPLETED',
+            [
+              './images/p5.jpg' ,
+              './images/p6.jpg'
+            ]
+          )">
+            <img src="./images/p5.jpg" alt="LANDSCAPE - SELECTED PROJECTS" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p7.jpg',
+            'HOUSING - TANTIA APARTMENT',
+            'Client: TANTIA, Location: KOLKATA, Status: Proposal',
+            [
+              './images/p7.jpg'  
+            ]
+          )">
+            <img src="./images/p7.jpg" alt="HOUSING - TANTIA APARTMENT" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2005 -->
+      <div>
+        <h2 class="year text-center">2005</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/img7.jpg',
+            'INTERIOR - HOTEL LINDSAY',
+            'Client: HOTEL LINDSAY, Location: KOLKATA, Status: COMPLETED',
+            [
+              './images/img7.jpg'  
+            ]
+          )">
+            <img src="./images/img7.jpg" alt="INTERIOR - HOTEL LINDSAY" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/img8.jpg',
+            'RESIDENCE - KARMAKAR\'S RESIDENCE',
+            'Client: Dr. Bhiram Karmakar, Location: Barbil, Status: Proposal',
+            [
+              './images/img8.jpg'  
+            ]
+          )">
+            <img src="./images/img8.jpg" alt="RESIDENCE - KARMAKAR'S RESIDENCE" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/img9.jpg',
+            'INSTITUTE - PODDAR INSTITUTE',
+            'Client: PODDAR GROUP, Location: KOLKATA, Status: COMPLETED',
+            [
+              './images/img9.jpg'  
+            ]
+          )">
+            <img src="./images/img9.jpg" alt="INSTITUTE - PODDAR INSTITUTE" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/img10.jpg',
+            'COMMERCIAL - BARBIL OFFICE COMPLEX',
+            'Client: BARBIL OFFICE COMPLEX, Location: BARBIL, Status: Proposal',
+            [
+              './images/img10.jpg'  
+            ]
+          )">
+            <img src="./images/img10.jpg" alt="COMMERCIAL - BARBIL OFFICE COMPLEX" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2004 -->
+      <div>
+        <h2 class="year text-center">2004</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/img6.jpg',
+            'COMMERCIAL - RAIKVA',
+            'Client: RENAULT DEVELOPERS PVT. LTD. , Location: E.M BYPASS, Status: COMPLETED',
+            [
+              './images/img6.jpg'  
+            ]
+          )">
+            <img src="./images/img6.jpg" alt="COMMERCIAL - RAIKVA" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2003 -->
+      <div>
+        <h2 class="year text-center">2003</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/img4.jpg',
+            'RESIDENCE - MANDAL\'S RESIDENCE',
+            'Client: Mr. Mandal, Location: Khardah, Status: COMPLETED',
+            [
+              './images/img4.jpg'  
+            ]
+          )">
+            <img src="./images/img4.jpg" alt="RESIDENCE - MANDAL'S RESIDENCE" class="project-img">
+          </div>
+
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/img5.jpg',
+            'RESIDENCE - Mr. PRABIR\'S RESIDENCE',
+            'Client: Mr. Prabir, Location: SODPUR, Status: COMPLETED',
+            [
+              './images/img5.jpg'  
+            ]
+          )">
+            <img src="./images/img5.jpg" alt="RESIDENCE - Mr. PRABIR'S RESIDENCE" class="project-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2002 - CLICKABLE -->
+      <div>
+        <h2 class="year text-center">2002</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <!-- CLICKABLE IMAGE -->
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/cheque 020.jpg',
+            'Star Theatre - Heritage Restoration',
+            'A landmark restoration project completed in 2002. Preserved original Victorian architecture while modernizing structural integrity.',
+            [
+              './images/starPICTURE2.jpg',
+              './images/starPICTURE3.jpg',
+              './images/starPICTURE1.jpg',
+              './images/starPICTURE4.jpg'  
+            ]
+          )">
+            <img src="./images/cheque 020.jpg" alt="Star Theatre 2002" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/img1.jpg',
+            'URBAN DESIGN - LOKEND BUTTERFLY',
+            'Client: LOKEND BUTTERFLY, Location: Scotland, Status: Completion Entry',
+            [
+              './images/img1.jpg'  
+            ]
+          )">
+            <img src="./images/img1.jpg" alt="URBAN DESIGN - LOKEND BUTTERFLY" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/img2.jpg',
+            'HOSPITALITY - FOREST RESORT',
+            'Client: GIVERNMENT OF WEST BENGAL, Location: Bahadurpur, Status: Proposal',
+            [
+              './images/img2.jpg'  
+            ]
+          )">
+            <img src="./images/img2.jpg" alt="HOSPITALITY - FOREST RESORT" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/img3.jpg',
+            'INSTITUTE - OFFER CHILDRENS HOME',
+            'Client: Offer, Location: Narendrapur, Status: Proposal',
+            [
+              './images/img3.jpg'  
+            ]
+          )">
+            <img src="./images/img3.jpg" alt="INSTITUTE - OFFER CHILDRENS HOME" class="project-img">
+          </div>
+        </div>
+      </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about" class="py-24 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+      <div class="liquid-glass p-12 rounded-3xl">
+        <h2 class="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+          About Polaris
+        </h2>
+        <p class="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+          Polaris is known for our imagination,expertise,client relationship,and
+performance.Many of our projects heve been widely published,and we are the
+recipients of several awards for design and engineering excellence.Polaris
+is particularly renowned for their service in sustainable design having
+sustainable design consultant as a partner having experience in providing
+innovative solutions from system design to holistic planning for the projects.
+        </p>
+
+      <!-- NEW: LEADERSHIP CARD -->
+      <div class="liquid-glass p-8 rounded-2xl mt-8 border border-white/20">
+        <h3 class="text-2xl font-bold mb-6 text-white">THE LEADERSHIP</h3>
+        <div class="flex flex-col items-center gap-4">
+          <img 
+            src="./images/Kalyan.jpg" 
+            alt="Kalyan Chakraborty - Principal Architect" 
+            class="w-48 h-64 object-cover rounded-lg shadow-xl"
+          >
+          <div class="text-center space-y-1">
+            <h4 class="text-xl font-bold text-white">KALYAN CHAKRABORTY</h4>
+            <p class="text-sm uppercase tracking-wider text-cyan-300">Partner</p>
+            <p class="text-sm text-gray-300">Role: Principal Architect & Sustainable Development Consultant</p>
+            <p class="text-xs text-gray-400">
+              B.Arch, Jadavpur University, Kolkata, 2001<br>
+              M.S. Architecture in Sustainable Design, Kansas State University, Manhattan, KS, United States<br>
+              IGBC AP
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEW: LEADERSHIP CARD -->
+      <div class="liquid-glass p-8 rounded-2xl mt-8 border border-white/20">
+        <h3 class="text-2xl font-bold mb-6 text-white">THE LEADERSHIP</h3>
+        <div class="flex flex-col items-center gap-4">
+          <img 
+            src="./images/Arindam.jpg" 
+            alt="Kalyan Chakraborty - Principal Architect" 
+            class="w-48 h-64 object-cover rounded-lg shadow-xl"
+          >
+          <div class="text-center space-y-1">
+            <h4 class="text-xl font-bold text-white">ARINDAM GHOSH</h4>
+            <p class="text-sm uppercase tracking-wider text-cyan-300">Partner</p>
+            <p class="text-sm text-gray-300">Role: Principal Architect</p>
+            <p class="text-xs text-gray-400">
+              B.ARCH, JADAVPUR UNIVERSITY, KOLKATA, 2001<br>
+            </p>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</section>
+
+      
+    
+
+  <!-- CONTACT -->
+  <section id="contact" class="py-24 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+      <div class="liquid-glass p-12 rounded-3xl">
+        <h2 class="text-4xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+          Locate us
+        </h2>
+        <div class="space-y-4 text-lg">
+          <p>Email: <a href="mailto:archpole@gmail.com, arindam@polaris-architect.com, kalyan@polaris-architect.com" class="text-blue-600 dark:text-blue-400 font-medium">archpole@gmail.com, arindam@polaris-architect.com, kalyan@polaris-architect.com</a></p>
+          <p>Phone: <span class="font-medium">033-2461-7133, 983178882, 9230551571</span></p>
+          <p class="text-sm text-gray-600 dark:text-gray-400">32A, Garcha 1st Lane, Kolkata - 700019</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-10 text-center text-sm text-gray-500 border-t border-gray-300 dark:border-gray-700">
+    <p>© 2025 Polaris Architect. Crafted with precision.</p>
+  </footer>
+
+  <!-- BIGGER MODAL -->
+  <div id="imageModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] hidden items-center justify-center p-4 md:p-8">
+    <div class="liquid-glass max-w-6xl w-full max-h-[92vh] overflow-y-auto rounded-3xl p-8 md:p-12 relative shadow-2xl">
+      <button id="closeModalBtn" class="absolute top-6 right-6 text-white text-4xl hover:text-red-400 transition z-10 bg-white/10 rounded-full w-12 h-12 flex items-center justify-center">
+        X
+      </button>
+      <div class="grid lg:grid-cols-2 gap-10">
+        <!-- LEFT: BIG IMAGE -->
+        <div class="order-2 lg:order-1">
+          <img id="modalMainImage" src="" alt="Project Detail" class="w-full h-auto max-h-[70vh] object-contain rounded-3xl shadow-2xl">
+        </div>
+        <!-- RIGHT: TEXT + THUMBS -->
+        <div class="order-1 lg:order-2 space-y-8">
+          <div>
+            <h3 id="modalTitle" class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              Project Title
+            </h3>
+            <p id="modalDesc" class="mt-4 text-lg text-gray-300 leading-relaxed max-w-xl">
+              Detailed description goes here...
+            </p>
+          </div>
+          <!-- 7 THUMBNAILS -->
+          <div class="grid grid-cols-4 gap-4">
+            <img src="" alt="" class="modal-thumb rounded-2xl cursor-pointer opacity-75 hover:opacity-100 transition-all duration-300 shadow-lg hover:scale-110">
+            <img src="" alt="" class="modal-thumb rounded-2xl cursor-pointer opacity-75 hover:opacity-100 transition-all duration-300 shadow-lg hover:scale-110">
+            <img src="" alt="" class="modal-thumb rounded-2xl cursor-pointer opacity-75 hover:opacity-100 transition-all duration-300 shadow-lg hover:scale-110">
+            <img src="" alt="" class="modal-thumb rounded-2xl cursor-pointer opacity-75 hover:opacity-100 transition-all duration-300 shadow-lg hover:scale-110">
+            <img src="" alt="" class="modal-thumb rounded-2xl cursor-pointer opacity-75 hover:opacity-100 transition-all duration-300 shadow-lg hover:scale-110">
+            <img src="" alt="" class="modal-thumb rounded-2xl cursor-pointer opacity-75 hover:opacity-100 transition-all duration-300 shadow-lg hover:scale-110">
+            <img src="" alt="" class="modal-thumb rounded-2xl cursor-pointer opacity-75 hover:opacity-100 transition-all duration-300 shadow-lg hover:scale-110">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AWARDS MODAL -->
+  <div id="awardsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] hidden items-center justify-center p-4">
+    <div class="liquid-glass max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 md:p-10 relative">
+      <!-- Close Button -->
+      <button id="closeAwardsModalBtn" class="absolute top-4 right-4 text-white text-3xl hover:text-red-400 transition">
+        ×
+      </button>
+
+      <!-- Modal Content -->
+      <div class="text-center">
+        <h3 class="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+          Awards & Accolades
+        </h3>
+        <p class="text-gray-300 leading-relaxed mb-4">
+          
+        </p>
+        <!-- Example Placeholder for Awards (add your content here) -->
+        <div class="space-y-4">
+          <div class="liquid-glass p-4 rounded-xl">
+            <h4 class="text-xl font-semibold">Awards </h4>
+            <p>Awards & Accolades</p>
+            <img src="./images/award1.jpg" alt="Award 1" class="w-full h-auto rounded-lg mt-2">
+          </div>
+         <div class="space-y-6">
+  <div class="liquid-glass p-6 rounded-2xl">
+    <h4 class="text-2xl font-semibold text-blue-400 mb-4 border-b border-blue-700 pb-2">Timeline</h4>
+    
+    <div class="space-y-3 text-lg leading-relaxed">
+      <p><span class="italic text-blue-300">2002:</span> <span class="font-semibold text-white">Polaris wins first prize for "STAR"</span></p>
+      <p><span class="italic text-blue-300">2003:</span> <span class="font-semibold text-white">Polaris wins third prize for "RUBY ROUNDABOUT"</span></p>
+      <p><span class="italic text-blue-300">2004:</span> <span class="font-semibold text-white">Polaris bags the design contract for "RAIKVA"</span></p>
+      <p><span class="italic text-blue-300">2005:</span> <span class="font-semibold text-white">Polaris completes the hotel "PRATIK" at Barbil</span></p>
+      <p><span class="italic text-blue-300">2006:</span> <span class="font-semibold text-white">Polaris completes the "STAR THEATRE"</span></p>
+      <p><span class="italic text-blue-300">2007:</span> <span class="font-semibold text-white">Polaris bags an award for "A.B. MAURI" office</span></p>
+      <p><span class="italic text-blue-300">2008:</span> <span class="font-semibold text-white">Polaris completes the "RAIKVA"</span></p>
+      <p><span class="italic text-blue-300">2009:</span> <span class="font-semibold text-white">Polaris bags the design contract for "UDAYPUR HOTEL"</span></p>
+      <p><span class="italic text-blue-300">2010:</span> <span class="font-semibold text-white">Evolo skyscraper competition entry published in EVOLO magazine</span></p>
+      <p><span class="italic text-blue-300">2011:</span> <span class="font-semibold text-white">Polaris bags prestigious design development contract for "RABINDRA TIRTHA"</span></p>
+      <p><span class="italic text-blue-300">2012:</span> <span class="font-semibold text-white">Polaris wins first prize for "BHAGAT SINGH BHAVAN"</span></p>
+      <p><span class="italic text-blue-300">2012:</span> <span class="font-semibold text-white">Polaris in association with MNC One wins 3rd prize for "EDMC"</span></p>
+      <p><span class="italic text-blue-300">2013:</span> <span class="font-semibold text-white">Polaris bags the design contract for "SOLACE"</span></p>
+      <p><span class="italic text-blue-300">2013:</span> <span class="font-semibold text-white">Polaris became finalist for "ISBT Indore"</span></p>
+      <p><span class="italic text-blue-300">2014:</span> <span class="font-semibold text-white">Polaris completes design of "VVIP GUEST HOUSE" & presents it to Manipur Ministry</span></p>
+      <p><span class="italic text-blue-300">2015:</span> <span class="font-semibold text-white">Polaris develops the concept design for "HYDERABAD POLICE HEAD QUARTER"</span></p>
+      <p><span class="italic text-blue-300">2017:</span> <span class="font-semibold text-white">IGEN 50 Award</span></p>
+      <p><span class="italic text-blue-300">2018:</span> <span class="font-semibold text-white">Polaris bags prestigious project of "KPC MEDICAL COLLEGE" at Jadavpur</span></p>
+      <p><span class="italic text-blue-300">2018:</span> <span class="font-semibold text-white">Polaris bags the prestigious campus planning project for "IACS" at Baruipur</span></p>
+    </div>
+  </div>
+</div>
+
+          <!-- Add more as needed -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script>
+    // MENU
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    hamburger.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+      document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+    });
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+      document.body.style.overflow = '';
+    });
+    document.querySelectorAll('.sidebar a').forEach(link => {
+      link.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // GSAP
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.utils.toArray('section').forEach(section => {
+      gsap.from(section.children, {
+        y: 80,
+        opacity: 0,
+        stagger: 0.15,
+        duration: 1.2,
+        ease: "power3.out",
+        scrollTrigger: { trigger: section, start: "top 80%" }
+      });
+    });
+
+    // MODAL
+    function openModal(mainImg, title, desc, thumbs) {
+      const modal = document.getElementById('imageModal');
+      const main = document.getElementById('modalMainImage');
+      const titleEl = document.getElementById('modalTitle');
+      const descEl = document.getElementById('modalDesc');
+      const thumbContainers = document.querySelectorAll('.modal-thumb');
+
+      main.src = mainImg || 'https://via.placeholder.com/1200x800';
+      titleEl.textContent = title;
+      descEl.textContent = desc;
+
+      thumbContainers.forEach((thumb, i) => {
+        if (thumbs && thumbs[i]) {
+          thumb.src = thumbs[i];
+          thumb.onclick = () => main.src = thumbs[i];
+          thumb.style.display = 'block';
+        } else {
+          thumb.style.display = 'none';
+        }
+      });
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('imageModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('imageModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('imageModal')) {
+        closeModal();
+      }
+    });
+
+    // AWARDS MODAL SYSTEM
+    function openAwardsModal() {
+      const awardsModal = document.getElementById('awardsModal');
+      awardsModal.classList.remove('hidden');
+      awardsModal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeAwardsModal() {
+      const awardsModal = document.getElementById('awardsModal');
+      awardsModal.classList.add('hidden');
+      awardsModal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('closeAwardsModalBtn').addEventListener('click', closeAwardsModal);
+    document.getElementById('awardsModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('awardsModal')) {
+        closeAwardsModal();
+      }
+    });
+  </script>
+
+</body>
+</html>

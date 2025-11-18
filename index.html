@@ -150,6 +150,141 @@
       opacity: 1;
       visibility: visible;
     }
+    /* Modal: make the main image almost full-screen while keeping the
+       right panel (title/description/thumbs) visible. Scoped to #imageModal. */
+    #imageModal .liquid-glass {
+      max-width: 98vw;
+      padding: 1rem;
+      max-height: 96vh;
+    }
+
+    /* Layout: single-column so image is on top and details appear below */
+    #imageModal .liquid-glass > .grid {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+
+    /* Ensure image appears first (top) and details panel comes after (bottom) */
+    #imageModal .liquid-glass > .grid > .order-2 { order: 1; } /* image container */
+    #imageModal .liquid-glass > .grid > .order-1 { order: 2; } /* details container */
+
+    /* Keep single-column behavior even on larger screens so details sit below the image */
+    @media (min-width: 768px) {
+      #imageModal .liquid-glass > .grid { grid-template-columns: 1fr; gap: 0.9rem; }
+      #imageModal .liquid-glass { padding: 1rem; }
+    }
+
+    @media (min-width: 1200px) {
+      #imageModal .liquid-glass > .grid { grid-template-columns: 1fr; gap: 1rem; }
+      #imageModal .liquid-glass { padding: 1.25rem; }
+    }
+
+    /* Make the main modal image fill available space but allow modal scrolling
+       and avoid cropping (use contain). Thumbnails will be horizontally
+       scrollable so all images remain accessible. */
+    #imageModal .liquid-glass {
+      overflow-y: auto; /* re-enable scrolling when content overflows */
+      max-height: 96vh;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #imageModal #modalMainImage {
+      width: 100%;
+      height: auto;
+      /* leave space for title/description/thumbs while allowing a large image */
+      max-height: calc(100vh - 180px);
+      object-fit: contain; /* show whole image without cropping */
+      border-radius: 10px;
+      display: block;
+      margin: 0 auto;
+    }
+    @media (min-width: 768px) {
+      #imageModal #modalMainImage { max-height: calc(100vh - 160px); }
+    }
+    @media (min-width: 1200px) {
+      #imageModal #modalMainImage { max-height: calc(100vh - 140px); }
+    }
+
+    /* Make the thumbs wrap to multiple rows so all thumbs are visible */
+    #imageModal .grid.grid-cols-4 {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      overflow-x: visible;
+      padding-bottom: 6px;
+    }
+
+    /* Responsive thumb sizing: 2 per row on very small, 3 on small, 4 on medium+ */
+    #imageModal .modal-thumb {
+      flex: 0 0 calc(50% - 0.75rem);
+      height: 72px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    @media (min-width: 480px) {
+      #imageModal .modal-thumb { flex: 0 0 calc(33.333% - 0.75rem); height: 76px; }
+    }
+    @media (min-width: 768px) {
+      #imageModal .modal-thumb { flex: 0 0 calc(25% - 0.75rem); height: 84px; }
+    }
+    @media (min-width: 1200px) {
+      #imageModal .modal-thumb { flex: 0 0 calc(25% - 0.75rem); height: 92px; }
+    }
+
+    /* Reduce the title so it doesn't compete with the image */
+    #imageModal #modalTitle {
+      font-size: 0.85rem;
+      line-height: 1.1;
+      margin-bottom: 0.25rem;
+    }
+    @media (min-width: 768px) { #imageModal #modalTitle { font-size: 0.95rem; } }
+    @media (min-width: 1024px) { #imageModal #modalTitle { font-size: 1rem; } }
+
+    #imageModal #modalDesc {
+      font-size: 0.875rem;
+      color: rgba(255,255,255,0.92);
+      max-width: 36rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Keep thumbnails usable but smaller so image remains dominant */
+    #imageModal .modal-thumb { width: 100%; height: 60px; object-fit: cover; border-radius: 12px; }
+    @media (min-width: 768px) { #imageModal .modal-thumb { height: 84px; } }
+    @media (min-width: 1200px) { #imageModal .modal-thumb { height: 92px; } }
+    /* Keep the modal close button fixed so it does not scroll with the modal content */
+    #closeModalBtn {
+      position: fixed !important;
+      top: 18px !important;
+      right: 18px !important;
+      z-index: 20000 !important;
+      width: 48px !important;
+      height: 48px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 9999px !important;
+      background: rgba(255,255,255,0.06) !important; /* transparent like before */
+      border: 2px solid rgba(255,255,255,0.08) !important;
+      backdrop-filter: blur(6px) !important;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35) !important;
+      cursor: pointer !important;
+      color: #ff6b6b !important; /* light red X */
+      font-weight: 700 !important;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease, color 0.12s ease;
+    }
+    #closeModalBtn:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.42) !important;
+      opacity: 0.98 !important;
+      color: #ff3b30 !important; /* slightly stronger red on hover */
+    }
+    @media (min-width: 768px) {
+      #closeModalBtn { top: 22px !important; right: 22px !important; width: 52px !important; height: 52px !important; }
+    }
+    @media (min-width: 1200px) {
+      #closeModalBtn { top: 26px !important; right: 26px !important; width: 56px !important; height: 56px !important; }
+    }
   </style>
 </head>
 <body class="min-h-screen">
@@ -222,7 +357,22 @@
    
 
       <!-- 2024 -->
-      
+      <div>
+        <h2 class="year text-center">2024</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p141.jpg',
+            'PROJECT - RBI AIZAWL',
+            'Client: RBI, Location: AIZAWL, Status: Ongoing 2024', 
+            [
+              './images/p141.jpg' , 
+            ]
+            
+          )">
+            <img src="./images/p141.jpg" alt="PROJECT - RBI AIZAWL" class="project-img">
+          </div>
+        </div>
+      </div>
 
       <!-- 2023 -->
       <div>
@@ -302,6 +452,18 @@
             ]
           )">
             <img src="./images/p57.jpg" alt="PROJECT - SOCIAL HOUSING" class="project-img">
+          </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p133.jpg',
+            'PROJECT - IWT TERMINAL',
+            'Client: STUP, Location: HALDIA, Status: COMPLETED 2021',
+            [
+              './images/p133.jpg',
+              './images/p134.jpg',
+              './images/p135.jpg',
+            ]
+          )">
+            <img src="./images/p133.jpg" alt="PROJECT - IWT TERMINAL" class="project-img">
           </div>
         </div>
       </div>
@@ -432,6 +594,10 @@
             [
               './images/p85.jpg' ,
               './images/p86.jpg' ,
+              './images/p129.jpg' ,
+              './images/p130.jpg' ,
+              './images/p131.jpg' ,
+              './images/p132.jpg' ,
             ]
             
           )">
@@ -588,6 +754,19 @@
           )">
             <img src="./images/p64.jpg" alt="PROJECT - IACS CAMPUS" class="project-img">
           </div>
+          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
+            './images/p136.jpg',
+            'PROJECT - IACS RESEARCH COMPLEX',
+            'Client: CPWD, Location: Baruipur, Status: COMPLETED',
+            [
+              './images/p136.jpg' ,
+              './images/p137.jpg' ,
+              './images/p138.jpg' ,
+            ]
+            
+          )">
+            <img src="./images/p136.jpg" alt="PROJECT - IACS RESEARCH COMPLEX" class="project-img">
+          </div>
         </div>
       </div>
 
@@ -619,10 +798,11 @@
           </div>
           <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
             './images/p48.jpg',
-            'INSTUITIONAL BUILDING - BE COLLEGE',
-            'Status: CONCEPT DESIGN 2016',
+            'INSTUITIONAL BUILDING - IIEST LECTURE COMPLEX',
+            'Client: CPWD, Location: Kolkata, Status: Concept',
             [
               './images/p48.jpg' ,
+              './images/p139.jpg' , 
             ]
           )">
             <img src="./images/p48.jpg" alt="INSTUITIONAL BUILDING" class="project-img">
@@ -894,7 +1074,7 @@
             <img src="./images/p16.jpg" alt="INSTUITIONAL - ITME D.H ROAD" class="project-img">
           </div>
           <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
-            './images/p16.jpg',
+            './images/014.jpg',
             'RABINDRA TIRTHA CULTURAL CENTRE',
             'Client: W.B HIDCO / SIMPLEX, Location: RAJARHAT, Status: COMPLETED',
             [
@@ -1038,14 +1218,14 @@
             <img src="./images/p2.jpg" alt="HOUSING - RIYADH HOUSING" class="project-img">
           </div>
           <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
-            './images/p3.jpg',
+            './images/P3.jpg',
             'INTERIOR - AB MAURI OFFICE',
             'Client: AB MAURI, Location: KOLKATA, Status: COMPLETED',
             [
-              './images/p3.jpg'  
+              './images/P3.jpg' ,
             ]
           )">
-            <img src="./images/p3.jpg" alt="INTERIOR - AB MAURI OFFICE" class="project-img">
+            <img src="./images/P3.jpg" alt="INTERIOR - AB MAURI OFFICE" class="project-img">
           </div>
           <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
             './images/p4.jpg',
@@ -1137,7 +1317,8 @@
             'COMMERCIAL - RAIKVA',
             'Client: RENAULT DEVELOPERS PVT. LTD. , Location: E.M BYPASS, Status: COMPLETED',
             [
-              './images/img6.jpg'  
+              './images/img6.jpg' , 
+              './images/p140.jpg' ,
             ]
           )">
             <img src="./images/img6.jpg" alt="COMMERCIAL - RAIKVA" class="project-img">
@@ -1233,9 +1414,9 @@
           About Polaris
         </h2>
         <p class="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-          Polaris is known for our imagination,expertise,client relationship,and
-performance.Many of our projects heve been widely published,and we are the
-recipients of several awards for design and engineering excellence.Polaris
+          Polaris is known for our imagination, expertise, client relationship, and
+performance. Many of our projects have been widely published, and we are the
+recipients of several awards for design and engineering excellence. Polaris
 is particularly renowned for their service in sustainable design having
 sustainable design consultant as a partner having experience in providing
 innovative solutions from system design to holistic planning for the projects.
@@ -1314,10 +1495,10 @@ innovative solutions from system design to holistic planning for the projects.
 
   <!-- BIGGER MODAL -->
   <div id="imageModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] hidden items-center justify-center p-4 md:p-8">
+    <button id="closeModalBtn" class="absolute top-6 right-6 text-white text-4xl hover:text-red-400 transition z-10 bg-white/10 rounded-full w-12 h-12 flex items-center justify-center">
+      X
+    </button>
     <div class="liquid-glass max-w-6xl w-full max-h-[92vh] overflow-y-auto rounded-3xl p-8 md:p-12 relative shadow-2xl">
-      <button id="closeModalBtn" class="absolute top-6 right-6 text-white text-4xl hover:text-red-400 transition z-10 bg-white/10 rounded-full w-12 h-12 flex items-center justify-center">
-        X
-      </button>
       <div class="grid lg:grid-cols-2 gap-10">
         <!-- LEFT: BIG IMAGE -->
         <div class="order-2 lg:order-1">

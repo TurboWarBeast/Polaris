@@ -433,13 +433,8 @@
             'PROJECT - DEVELOPMENT OF LAND PARCEL IN RADHANAGAR BEACH & GOVINDNAGAR, SWARAJ DWEEP',
             'Client: Andaman and Nicobar Administration through the project Proponent namely Andaman and Nicobar Islands Intrgrated Development Corporation Limited (ANIIDCO), Location: GOVINDNAGAR, Status: Competition Entry', 
             [
-              './images/pv1.jpg' , 
-              './images/pv2.jpg' ,
-              './images/pv3.jpg' ,
               './images/pv4.jpg' ,
               './images/pv5.jpg' ,
-              './images/pv6.jpg' ,
-              './images/pv7.jpg' ,
               './images/pv8.jpg' ,
               './images/pv9.jpg' ,
               './images/pv10.jpg' ,
@@ -449,20 +444,21 @@
             <img src="./images/pv9.jpg" alt="PROJECT - DEVELOPMENT OF LAND PARCEL IN RADHANAGAR BEACH & GOVINDNAGAR, SWARAJ DWEEP" class="project-img">
           </div>
           <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
-            './images/pv11.jpg',
+            './images/vi4.jpg',
             'PROJECT - Vpier Island',
             'Client: ANIIDCO, Location: Andaman and Nicobar Islands, Status: Competition Entry', 
             [
-              './images/pv11.jpg' ,
-              './images/pv12.jpg' ,
-              './images/pv13.jpg' ,
-              './images/pv14.jpg' ,
-              './images/pv15.jpg' ,
-              './images/pv16.jpg' ,
+              './images/vi1.jpg' ,
+              './images/vi2.jpg' ,
+              './images/vi3.jpg' ,
+              './images/vi4.jpg' ,
+              './images/vi5.jpg' ,
+              './images/vi6.jpg' ,
+              './images/vi7.jpg' ,
             ]
             
           )">
-            <img src="./images/pv11.jpg" alt="PROJECT - Vpier Island" class="project-img">
+            <img src="./images/vi4.jpg" alt="PROJECT - Vpier Island" class="project-img">
           </div>
         </div>
       </div>
@@ -1178,17 +1174,6 @@
           )">
             <img src="./images/P20.jpg" alt="HOSPITALITY - SANA BEACH RESORT" class="project-img">
           </div>
-          <div class="liquid-glass p-4 cursor-pointer" onclick="openModal(
-            './images/p116.jpg',
-            'PROJECT - MULTI STOREY OFFICE COMPLEX',
-            'Client: BENGAL AMBUJA, Location: EAST DELHI, Status: PROPOSED 2012',
-            [
-              './images/p116.jpg' ,
-              './images/p117.jpg' ,
-            ]
-          )">
-            <img src="./images/p116.jpg" alt="PROJECT - MULTI STOREY OFFICE COMPLEX" class="project-img">
-          </div>
         </div>
       </div>
 
@@ -1634,8 +1619,14 @@ innovative solutions from system design to holistic planning for the projects.
     <div class="liquid-glass max-w-6xl w-full max-h-[92vh] overflow-y-auto rounded-3xl p-8 md:p-12 relative shadow-2xl">
       <div class="grid lg:grid-cols-2 gap-10">
         <!-- LEFT: BIG IMAGE -->
-        <div class="order-2 lg:order-1">
+        <div class="order-2 lg:order-1 relative">
+          <button id="modalPrevBtn" aria-label="Previous image" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 flex items-center justify-center text-2xl">
+            ‹
+          </button>
           <img id="modalMainImage" src="" alt="Project Detail" class="w-full h-auto max-h-[70vh] object-contain rounded-3xl shadow-2xl">
+          <button id="modalNextBtn" aria-label="Next image" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 flex items-center justify-center text-2xl">
+            ›
+          </button>
         </div>
         <!-- RIGHT: TEXT + THUMBS -->
         <div class="order-1 lg:order-2 space-y-8">
@@ -1765,25 +1756,95 @@ innovative solutions from system design to holistic planning for the projects.
       const main = document.getElementById('modalMainImage');
       const titleEl = document.getElementById('modalTitle');
       const descEl = document.getElementById('modalDesc');
+      const prevBtn = document.getElementById('modalPrevBtn');
+      const nextBtn = document.getElementById('modalNextBtn');
       const thumbContainers = document.querySelectorAll('.modal-thumb');
 
-      main.src = mainImg || 'https://via.placeholder.com/1200x800';
-      titleEl.textContent = title;
-      descEl.textContent = desc;
+      // store thumbs and current index on the window so handlers can access
+      window._modalThumbs = Array.isArray(thumbs) ? thumbs.slice() : [];
 
+      // determine initial index (try to find mainImg in thumbs)
+      let startIndex = 0;
+      if (window._modalThumbs.length) {
+        const found = window._modalThumbs.indexOf(mainImg);
+        startIndex = found >= 0 ? found : 0;
+      }
+
+      window._modalCurrentIndex = startIndex;
+
+      function setModalIndex(i) {
+        if (!window._modalThumbs.length) return;
+        const len = window._modalThumbs.length;
+        // wrap around
+        const idx = (i % len + len) % len;
+        window._modalCurrentIndex = idx;
+        main.src = window._modalThumbs[idx];
+
+        // update thumbnail active state
+        thumbContainers.forEach((thumb, j) => {
+          if (j === idx) {
+            thumb.classList.add('opacity-100', 'scale-110', 'ring-4', 'ring-white/20');
+          } else {
+            thumb.classList.remove('opacity-100', 'scale-110', 'ring-4', 'ring-white/20');
+          }
+        });
+      }
+
+      // populate thumbnails
       thumbContainers.forEach((thumb, i) => {
-        if (thumbs && thumbs[i]) {
-          thumb.src = thumbs[i];
-          thumb.onclick = () => main.src = thumbs[i];
+        if (window._modalThumbs && window._modalThumbs[i]) {
+          thumb.src = window._modalThumbs[i];
+          thumb.onclick = () => setModalIndex(i);
           thumb.style.display = 'block';
         } else {
           thumb.style.display = 'none';
         }
       });
 
+      // set title/desc
+      titleEl.textContent = title;
+      descEl.textContent = desc;
+
+      // show modal
       modal.classList.remove('hidden');
       modal.classList.add('flex');
       document.body.style.overflow = 'hidden';
+
+      // initialize main image and active thumb
+      if (window._modalThumbs.length) {
+        setModalIndex(window._modalCurrentIndex);
+      } else {
+        main.src = mainImg || 'https://via.placeholder.com/1200x800';
+      }
+
+      // show/hide nav buttons depending on count
+      if (window._modalThumbs.length > 1) {
+        prevBtn.style.display = 'flex';
+        nextBtn.style.display = 'flex';
+      } else {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+      }
+
+      // add one-time handlers for prev/next and keyboard navigation
+      if (!window._modalNavInit) {
+        prevBtn.addEventListener('click', () => {
+          setModalIndex(window._modalCurrentIndex - 1);
+        });
+        nextBtn.addEventListener('click', () => {
+          setModalIndex(window._modalCurrentIndex + 1);
+        });
+
+        document.addEventListener('keydown', (e) => {
+          const modalVisible = !document.getElementById('imageModal').classList.contains('hidden');
+          if (!modalVisible) return;
+          if (e.key === 'ArrowLeft') setModalIndex(window._modalCurrentIndex - 1);
+          if (e.key === 'ArrowRight') setModalIndex(window._modalCurrentIndex + 1);
+          if (e.key === 'Escape') closeModal();
+        });
+
+        window._modalNavInit = true;
+      }
     }
 
     function closeModal() {
